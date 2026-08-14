@@ -1,0 +1,73 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 30 7% 6%;
+    /* #0f0f0e - Claude Warm Dark Canvas */
+    --foreground: 40 20% 92%;
+    /* #eae7df - Warm Sand text */
+    --card: 30 6% 10%;
+    /* #191816 - Warm Charcoal card */
+    --card-foreground: 40 20% 92%;
+    --popover: 30 6% 10%;
+    --popover-foreground: 40 20% 92%;
+    --primary: 16 68% 56%;
+    /* #d97757 - Claude Terracotta */
+    --primary-foreground: 30 7% 6%;
+    --secondary: 30 5% 15%;
+    /* #262522 */
+    --secondary-foreground: 40 20% 90%;
+    --muted: 30 5% 18%;
+    --muted-foreground: 36 10% 60%;
+    --accent: 16 68% 56%;
+    --accent-foreground: 30 7% 6%;
+    --destructive: 0 65% 58%;
+    --destructive-foreground: 40 20% 92%;
+    --border: 30 6% 18%;
+    /* #312f2b */
+    --input: 30 6% 18%;
+    --ring: 16 68% 56%;
+    --radius: 0.875rem;
+  }
+}
+
+html {
+  font-size: 120%;
+}
+
+body {
+  color: hsl(var(--foreground));
+  background: hsl(var(--background));
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  overflow-x: hidden;
+  letter-spacing: -0.01em;
+  min-height: 100vh;
+}
+
+/* Warm, elegant scrollbar */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0f0f0e;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2a2926;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3d3b37;
+}
+
+::selection {
+  background: rgba(217, 119, 87, 0.35);
+  color: #fff;
+}

@@ -1,0 +1,73 @@
+name: CodeMorph Sandbox Runner
+
+on:
+  repository_dispatch:
+    types: [run-patch]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout sandbox repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Write patched files to disk
+        run: |
+          node -e "
+            const fs = require('fs');
+            const path = require('path');
+            const files = JSON.parse(process.env.PATCHED_FILES);
+            files.forEach(({ filePath, content }) => {
+              const dir = path.dirname(filePath);
+              fs.mkdirSync(dir, { recursive: true });
+              fs.writeFileSync(filePath, content, 'utf-8');
+            });
+            console.log('Successfully wrote', files.length, 'patched files to disk.');
+          "
+        env:
+          PATCHED_FILES: ${{ toJson(github.event.client_payload.files) }}
+
+      - name: Install dependencies
+        run: npm install --ignore-scripts
+        continue-on-error: true
+
+      - name: TypeScript check
+        id: tsc
+        run: npx tsc --noEmit --skipLibCheck 2>&1
+        continue-on-error: true
+
+      - name: ESLint check
+        id: lint
+        run: npx eslint . --ext .ts,.tsx,.js,.jsx --max-warnings 0 2>&1
+        continue-on-error: true
+
+      - name: Report results
+        if: always()
+        run: |
+          TSC_EXIT="${{ steps.tsc.outcome }}"
+          LINT_EXIT="${{ steps.lint.outcome }}"
+
+          if [ "$TSC_EXIT" = "success" ] && [ "$LINT_EXIT" = "success" ]; then
+            STATUS="passed"
+          else
+            STATUS="failed"
+          fi
+
+          curl -X POST "${{ github.event.client_payload.webhookUrl }}" \
+            -H "Content-Type: application/json" \
+            -H "x-webhook-secret: ${{ secrets.WEBHOOK_SECRET }}" \
+            -d "{
+              \"jobId\": \"${{ github.event.client_payload.jobId }}\",
+              \"runId\": \"${{ github.run_id }}\",
+              \"attemptNumber\": ${{ github.event.client_payload.attemptNumber }},
+              \"status\": \"$STATUS\",
+              \"tscResult\": \"$TSC_EXIT\",
+              \"lintResult\": \"$LINT_EXIT\"
+            }"

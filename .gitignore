@@ -1,0 +1,70 @@
+# ==========================================
+# CodeMorph .gitignore
+# ==========================================
+
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# Next.js Build Output & Cache
+.next/
+out/
+build/
+dist/
+
+# Environment variables & Local Secrets
+.env
+.env*.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+*.log
+
+# Diagnostic & Performance Tracing
+.turbo/
+next-env.d.ts
+*.tsbuildinfo
+
+# Testing & Coverage
+coverage/
+.nyc_output/
+cypress/videos/
+cypress/screenshots/
+
+# IDE & Editor Configurations
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS Generated Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Vercel Deployment Metadata
+.vercel/
+
+# SSL Certificates & Keys
+*.pem
+*.key
+*.crt
