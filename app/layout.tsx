@@ -3,7 +3,7 @@ import './globals.css'
 import Navbar from '@/components/Navbar'
 
 export const metadata: Metadata = {
-  title: 'CodeMorph — Autonomous Multi-Agent Vulnerability Remediation',
+  title: 'CodeMorph | Autonomous Multi-Agent Vulnerability Remediation',
   description: 'Autonomous multi-agent system that scans GitHub repositories, patches vulnerabilities and legacy patterns with LLMs, verifies fixes in isolated GitHub Actions VMs, and opens verified PRs.',
 }
 
