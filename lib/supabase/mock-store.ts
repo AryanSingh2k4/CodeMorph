@@ -8,11 +8,18 @@ class MockDatabase {
   private runs: Map<string, SandboxRun[]> = new Map()
 
   constructor() {
-    this.seedDemoData()
+    // Start empty so clean empty states are rendered unless explicitly seeded or ingested
   }
 
-  private seedDemoData() {
-    const demoJobId = 'demo-job-express-security'
+  public clear() {
+    this.jobs.clear()
+    this.files.clear()
+    this.findings.clear()
+    this.runs.clear()
+  }
+
+  public seedDemoData(customJobId?: string): string {
+    const demoJobId = customJobId || `benchmark-${Date.now().toString(36)}`
     const now = new Date().toISOString()
 
     const demoJob: Job = {
@@ -30,7 +37,7 @@ class MockDatabase {
 
     const demoFiles: JobFile[] = [
       {
-        id: 'f1',
+        id: `f1-${demoJobId}`,
         job_id: demoJobId,
         file_path: 'src/routes/auth.ts',
         original_content: `import express from 'express';
@@ -46,7 +53,7 @@ router.post('/login', async (req, res) => {
   if (!user) {
     return res.status(401).json({ error: 'Invalid credentials' });
   }
-  return res.json({ token: 'mock-jwt-token' });
+  return res.json({ token: 'jwt-session-token' });
 });
 
 export default router;`,
@@ -69,7 +76,7 @@ router.post('/login', async (req, res) => {
   if (!user || user.rowCount === 0) {
     return res.status(401).json({ error: 'Invalid credentials' });
   }
-  return res.json({ token: 'mock-jwt-token', user: user.rows[0] });
+  return res.json({ token: 'jwt-session-token', user: user.rows[0] });
 });
 
 export default router;`,
@@ -81,7 +88,7 @@ export default router;`,
         }
       },
       {
-        id: 'f2',
+        id: `f2-${demoJobId}`,
         job_id: demoJobId,
         file_path: 'src/components/UserProfile.tsx',
         original_content: `import React, { Component } from 'react';
@@ -177,7 +184,7 @@ export default function UserProfile({ userId }: Props) {
 
     const demoFindings: Finding[] = [
       {
-        id: 'find-1',
+        id: `find-1-${demoJobId}`,
         job_id: demoJobId,
         file_path: 'src/routes/auth.ts',
         line_number: 10,
@@ -187,7 +194,7 @@ export default function UserProfile({ userId }: Props) {
         description: 'Parameters extracted from req.body are concatenated directly into raw database query strings, allowing arbitrary SQL execution.'
       },
       {
-        id: 'find-2',
+        id: `find-2-${demoJobId}`,
         job_id: demoJobId,
         file_path: 'src/components/UserProfile.tsx',
         line_number: 28,
@@ -197,7 +204,7 @@ export default function UserProfile({ userId }: Props) {
         description: 'Unsanitized user-supplied bio string injected directly into DOM tree via dangerouslySetInnerHTML.'
       },
       {
-        id: 'find-3',
+        id: `find-3-${demoJobId}`,
         job_id: demoJobId,
         file_path: 'src/components/UserProfile.tsx',
         line_number: 11,
@@ -210,7 +217,7 @@ export default function UserProfile({ userId }: Props) {
 
     const demoRuns: SandboxRun[] = [
       {
-        id: 'run-1',
+        id: `run-1-${demoJobId}`,
         job_id: demoJobId,
         attempt_number: 1,
         github_run_id: '9847120349',
@@ -226,6 +233,8 @@ export default function UserProfile({ userId }: Props) {
     this.files.set(demoJobId, demoFiles)
     this.findings.set(demoJobId, demoFindings)
     this.runs.set(demoJobId, demoRuns)
+
+    return demoJobId
   }
 
   getJob(id: string) { return this.jobs.get(id) }

@@ -1,73 +1,110 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=JetBrains+Mono:wght@400;500;600&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 30 7% 6%;
-    /* #0f0f0e - Claude Warm Dark Canvas */
-    --foreground: 40 20% 92%;
-    /* #eae7df - Warm Sand text */
-    --card: 30 6% 10%;
-    /* #191816 - Warm Charcoal card */
-    --card-foreground: 40 20% 92%;
-    --popover: 30 6% 10%;
-    --popover-foreground: 40 20% 92%;
+    --background: 0 0% 0%;
+    /* #000000 - True Black Canvas */
+    --foreground: 0 0% 95%;
+    /* #f2f2f2 - Text Primary */
+    --card: 0 0% 7%;
+    /* #121212 - Card Surface */
+    --card-foreground: 0 0% 95%;
+    --popover: 0 0% 7%;
+    --popover-foreground: 0 0% 95%;
     --primary: 16 68% 56%;
-    /* #d97757 - Claude Terracotta */
-    --primary-foreground: 30 7% 6%;
-    --secondary: 30 5% 15%;
-    /* #262522 */
-    --secondary-foreground: 40 20% 90%;
-    --muted: 30 5% 18%;
-    --muted-foreground: 36 10% 60%;
+    /* #d97757 - Brand Coral */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 9%;
+    /* #161616 - Elevated Surface */
+    --secondary-foreground: 0 0% 95%;
+    --muted: 0 0% 10%;
+    --muted-foreground: 0 0% 71%;
+    /* #b6b6b6 - Text Muted */
     --accent: 16 68% 56%;
-    --accent-foreground: 30 7% 6%;
+    --accent-foreground: 0 0% 100%;
     --destructive: 0 65% 58%;
-    --destructive-foreground: 40 20% 92%;
-    --border: 30 6% 18%;
-    /* #312f2b */
-    --input: 30 6% 18%;
+    /* #e05353 - Rust Red */
+    --destructive-foreground: 0 0% 95%;
+    --border: 0 0% 15%;
+    /* #262626 - Subtle Border */
+    --input: 0 0% 15%;
     --ring: 16 68% 56%;
-    --radius: 0.875rem;
+    --radius: 0.5rem;
   }
 }
 
 html {
-  font-size: 120%;
+  font-size: 100%;
+  background-color: #000000;
+  color: #f2f2f2;
 }
 
 body {
   color: hsl(var(--foreground));
-  background: hsl(var(--background));
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: #000000;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   overflow-x: hidden;
   letter-spacing: -0.01em;
   min-height: 100vh;
 }
 
-/* Warm, elegant scrollbar */
+/* Typography Utility Classes */
+.text-display-h1 {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 40px;
+  font-weight: 600;
+  line-height: 50px;
+}
+
+.text-heading-h2 {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 30px;
+}
+
+.text-body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+}
+
+.text-body-compact {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 18.4px;
+}
+
+.text-caption {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 18px;
+}
+
+/* Minimalist Dark Scrollbars */
 ::-webkit-scrollbar {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0f0f0e;
+  background: #000000;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #2a2926;
-  border-radius: 4px;
+  background: #262626;
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #3d3b37;
+  background: #333333;
 }
 
 ::selection {
   background: rgba(217, 119, 87, 0.35);
-  color: #fff;
+  color: #ffffff;
 }

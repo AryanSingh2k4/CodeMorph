@@ -25,13 +25,13 @@ export function getSeverityBadgeClass(severity?: string | null): string {
     case "critical":
       return "bg-rust-950/80 text-rust-400 border border-rust-500/40"
     case "high":
-      return "bg-terracotta-950/80 text-terracotta-300 border border-terracotta-500/40"
+      return "bg-coral-950/80 text-coral-400 border border-coral-500/40"
     case "medium":
-      return "bg-[#2d2417] text-[#e9c46a] border border-[#e9c46a]/30"
+      return "bg-amber-950/80 text-amber-400 border border-amber-500/30"
     case "low":
       return "bg-sage-950/80 text-sage-400 border border-sage-500/40"
     default:
-      return "bg-charcoal-850 text-sand-400 border border-[#312f2b]"
+      return "bg-[#161616] text-[#b6b6b6] border border-[#262626]"
   }
 }
 
@@ -42,16 +42,16 @@ export function getStatusBadgeClass(status: string): string {
     case "failed":
       return "bg-rust-950/80 text-rust-400 border border-rust-500/40"
     case "healing":
-      return "bg-[#2d2417] text-[#f4a261] border border-[#f4a261]/40 animate-pulse"
+      return "bg-amber-950/80 text-amber-400 border border-amber-500/40 animate-pulse"
     case "testing":
-      return "bg-terracotta-950/80 text-terracotta-300 border border-terracotta-500/40 animate-pulse"
+      return "bg-coral-950/80 text-coral-400 border border-coral-500/40 animate-pulse"
     case "patching":
-      return "bg-[#26201a] text-terracotta-400 border border-terracotta-500/30 animate-pulse"
+      return "bg-[#1a1a1a] text-coral-400 border border-coral-500/30 animate-pulse"
     case "scanning":
-      return "bg-charcoal-850 text-sand-300 border border-sand-500/30 animate-pulse"
+      return "bg-[#161616] text-[#f2f2f2] border border-[#333333] animate-pulse"
     case "ingesting":
-      return "bg-charcoal-850 text-sand-400 border border-[#312f2b] animate-pulse"
+      return "bg-[#161616] text-[#b6b6b6] border border-[#262626] animate-pulse"
     default:
-      return "bg-charcoal-850 text-sand-500 border border-[#312f2b]"
+      return "bg-[#161616] text-[#8c8c8c] border border-[#262626]"
   }
 }

@@ -17,7 +17,7 @@ interface StatusTimelineProps {
 
 const STEPS = [
   { key: 'ingesting', label: 'Ingestion', desc: 'Fetch Git tree & AST parse', icon: DownloadCloud },
-  { key: 'scanning', label: 'Scanner Agent', desc: 'Identify flaws & migrations', icon: Search },
+  { key: 'scanning', label: 'Scanner Agent', desc: 'Identify flaws & patterns', icon: Search },
   { key: 'patching', label: 'Patcher Agent', desc: 'Synthesize code remakes', icon: Wrench },
   { key: 'testing', label: 'Sandbox VM', desc: 'TypeScript & ESLint in Ubuntu', icon: Cpu },
   { key: 'healing', label: 'Self-Healing', desc: 'Loop errors back to LLM', icon: RefreshCw },
@@ -45,37 +45,37 @@ export default function StatusTimeline({ status, attemptCount, maxAttempts }: St
   }
 
   return (
-    <div className="w-full bg-[#181715] border border-[#2e2a24] rounded-2xl p-6 shadow-warm">
-      <div className="flex items-center justify-between mb-6 pb-4 border-b border-[#292621]">
+    <div className="w-full bg-[#121212] border border-[#262626] rounded-xl p-5">
+      <div className="flex items-center justify-between mb-5 pb-3 border-b border-[#262626]">
         <div>
-          <h2 className="text-sm font-serif font-semibold text-sand-100 flex items-center space-x-2">
-            <span className="w-2 h-2 rounded-full bg-terracotta-500 animate-pulse"></span>
+          <h2 className="text-sm font-semibold text-[#f2f2f2] flex items-center space-x-2">
+            <span className="w-2 h-2 rounded-full bg-coral-500 animate-pulse"></span>
             <span>Autonomous Pipeline Orchestration</span>
           </h2>
-          <p className="text-xs text-sand-500 mt-0.5">Real-time multi-agent execution pipeline</p>
+          <p className="text-caption text-[#8c8c8c] mt-0.5">Real-time multi-agent execution pipeline</p>
         </div>
 
         <div className="flex items-center space-x-2">
-          <span className="text-xs font-mono px-3 py-1 rounded-full bg-[#22201c] border border-[#36332c] text-sand-300">
-            Cycle: Attempt {attemptCount} / {maxAttempts}
+          <span className="text-caption font-mono px-2.5 py-0.5 rounded bg-[#161616] border border-[#262626] text-[#b6b6b6]">
+            Attempt {attemptCount} / {maxAttempts}
           </span>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2.5">
         {STEPS.map((step, idx) => {
           const state = getStepState(step.key)
           const Icon = step.icon
 
-          let bgClass = 'bg-[#141311] border-[#292621] text-sand-600'
-          let iconClass = 'text-sand-500 bg-[#1c1a17]'
+          let bgClass = 'bg-[#161616] border-[#262626] text-[#8c8c8c]'
+          let iconClass = 'text-[#8c8c8c] bg-[#1a1a1a]'
 
           if (state === 'completed') {
-            bgClass = 'bg-[#121c15] border-sage-500/30 text-sage-300'
-            iconClass = 'text-sage-400 bg-sage-950/60'
+            bgClass = 'bg-sage-950/40 border-sage-500/30 text-sage-300'
+            iconClass = 'text-sage-400 bg-sage-950/80'
           } else if (state === 'active') {
-            bgClass = 'bg-[#241c17] border-terracotta-500/60 text-terracotta-200 ring-1 ring-terracotta-500/30 shadow-sm'
-            iconClass = 'text-terracotta-400 bg-terracotta-950/80 animate-pulse'
+            bgClass = 'bg-coral-950/30 border-coral-500/60 text-coral-200 ring-1 ring-coral-500/20'
+            iconClass = 'text-coral-400 bg-coral-950/80 animate-pulse'
           } else if (state === 'failed') {
             bgClass = 'bg-rust-950/40 border-rust-500/40 text-rust-300'
             iconClass = 'text-rust-400 bg-rust-950/80'
@@ -84,25 +84,25 @@ export default function StatusTimeline({ status, attemptCount, maxAttempts }: St
           return (
             <div
               key={step.key}
-              className={`rounded-xl border p-3.5 flex flex-col justify-between transition-all relative overflow-hidden ${bgClass}`}
+              className={`rounded-lg border p-3 flex flex-col justify-between transition-all relative overflow-hidden ${bgClass}`}
             >
               <div className="flex items-center justify-between mb-2">
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center border border-[#343029] ${iconClass}`}>
-                  <Icon className={`w-4 h-4 ${state === 'active' && step.key === 'healing' ? 'animate-spin' : ''}`} />
+                <div className={`w-7 h-7 rounded flex items-center justify-center border border-[#262626] ${iconClass}`}>
+                  <Icon className={`w-3.5 h-3.5 ${state === 'active' && step.key === 'healing' ? 'animate-spin' : ''}`} />
                 </div>
-                <span className="text-[10px] font-mono text-sand-600">0{idx + 1}</span>
+                <span className="text-[10px] font-mono text-[#666666]">0{idx + 1}</span>
               </div>
 
               <div>
-                <div className="flex items-center space-x-1.5">
-                  <h4 className="text-xs font-semibold text-sand-200">{step.label}</h4>
+                <div className="flex items-center space-x-1">
+                  <h4 className="text-xs font-semibold text-[#f2f2f2]">{step.label}</h4>
                   {state === 'completed' && <CheckCircle2 className="w-3 h-3 text-sage-400" />}
                 </div>
-                <p className="text-[11px] text-sand-500 mt-1 leading-tight">{step.desc}</p>
+                <p className="text-[11px] text-[#8c8c8c] mt-1 leading-tight">{step.desc}</p>
               </div>
 
               {state === 'active' && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-terracotta-500"></div>
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-coral-500"></div>
               )}
             </div>
           )

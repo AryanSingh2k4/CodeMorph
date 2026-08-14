@@ -20,13 +20,13 @@ const PRESET_REPOSITORIES = [
     name: 'Legacy React Codebase',
     url: 'https://github.com/facebook/sample-legacy-react',
     tag: 'Class Components & Hooks',
-    tagClass: 'bg-[#2d2417] text-[#f4a261] border border-[#f4a261]/30'
+    tagClass: 'bg-amber-950/80 text-amber-400 border border-amber-500/30'
   },
   {
     name: 'Node Authentication Service',
     url: 'https://github.com/auth0/sample-auth-service',
     tag: 'JWT & DOM XSS',
-    tagClass: 'bg-[#1e2321] text-sage-400 border border-sage-500/30'
+    tagClass: 'bg-sage-950/80 text-sage-400 border border-sage-500/30'
   }
 ]
 
@@ -74,10 +74,10 @@ export default function RepoInput({ onSuccess, isModal = false }: RepoInputProps
 
   return (
     <div className={`w-full ${isModal ? '' : 'max-w-2xl mx-auto'}`}>
-      <form onSubmit={(e) => handleSubmit(e)} className="relative group">
-        <div className="relative flex items-center bg-[#181715] border border-[#312f2a] focus-within:border-terracotta-500/70 focus-within:ring-2 focus-within:ring-terracotta-500/20 rounded-2xl p-2 shadow-warm transition-all">
-          <div className="pl-3 pr-2 text-sand-400">
-            <GitBranch className="w-5 h-5 text-terracotta-500" />
+      <form onSubmit={(e) => handleSubmit(e)} className="relative">
+        <div className="relative flex items-center bg-[#121212] border border-[#262626] focus-within:border-coral-500 focus-within:ring-1 focus-within:ring-coral-500/20 rounded-xl p-1.5 transition-all">
+          <div className="pl-3 pr-2 text-[#b6b6b6]">
+            <GitBranch className="w-4 h-4 text-coral-500" />
           </div>
           <input
             type="text"
@@ -85,12 +85,12 @@ export default function RepoInput({ onSuccess, isModal = false }: RepoInputProps
             value={repoUrl}
             onChange={(e) => setRepoUrl(e.target.value)}
             disabled={loading}
-            className="w-full bg-transparent text-sm text-sand-100 placeholder-sand-600 focus:outline-none px-2 py-2 font-sans"
+            className="w-full bg-transparent text-sm text-[#f2f2f2] placeholder-[#666666] focus:outline-none px-2 py-2 font-sans"
           />
           <button
             type="submit"
             disabled={loading}
-            className="inline-flex items-center space-x-2 px-5 py-2.5 rounded-xl bg-terracotta-500 hover:bg-terracotta-600 text-white font-medium text-xs transition-all shadow-terracotta disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer whitespace-nowrap"
+            className="inline-flex items-center space-x-1.5 px-4 py-2 rounded-lg bg-coral-500 hover:bg-coral-600 text-white font-medium text-xs transition-all shadow-coral disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer whitespace-nowrap"
           >
             {loading ? (
               <>
@@ -99,8 +99,8 @@ export default function RepoInput({ onSuccess, isModal = false }: RepoInputProps
               </>
             ) : (
               <>
-                <span>Launch Autonomous Scan</span>
-                <ArrowRight className="w-4 h-4" />
+                <span>Launch Scan</span>
+                <ArrowRight className="w-3.5 h-3.5" />
               </>
             )}
           </button>
@@ -108,21 +108,21 @@ export default function RepoInput({ onSuccess, isModal = false }: RepoInputProps
       </form>
 
       {error && (
-        <div className="mt-3 p-3.5 rounded-xl bg-rust-950/60 border border-rust-500/40 text-rust-400 text-xs flex items-center space-x-2.5">
+        <div className="mt-3 p-3 rounded-lg bg-rust-950/60 border border-rust-500/40 text-rust-400 text-xs flex items-center space-x-2">
           <ShieldAlert className="w-4 h-4 shrink-0 text-rust-400" />
           <span>{error}</span>
         </div>
       )}
 
       {/* Preset Repositories */}
-      <div className="mt-5">
-        <div className="flex items-center justify-between mb-2.5">
-          <span className="text-xs font-medium text-sand-400 flex items-center space-x-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-terracotta-500" />
+      <div className="mt-4">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-caption text-[#8c8c8c] flex items-center space-x-1.5">
+            <Sparkles className="w-3 h-3 text-coral-500" />
             <span>Or explore standard benchmark projects:</span>
           </span>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
           {PRESET_REPOSITORIES.map((preset) => (
             <button
               key={preset.url}
@@ -132,14 +132,14 @@ export default function RepoInput({ onSuccess, isModal = false }: RepoInputProps
                 handleSubmit(undefined, preset.url)
               }}
               disabled={loading}
-              className="text-left p-3 rounded-xl bg-[#181715] hover:bg-[#201e1a] border border-[#2e2a24] hover:border-terracotta-500/40 transition-all group disabled:opacity-50 shadow-sm"
+              className="text-left p-3 rounded-lg bg-[#121212] hover:bg-[#161616] border border-[#262626] hover:border-[#333333] transition-all group disabled:opacity-50"
             >
               <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-sand-200 group-hover:text-terracotta-300 truncate">
+                <span className="text-xs font-medium text-[#f2f2f2] group-hover:text-coral-400 truncate">
                   {preset.name}
                 </span>
               </div>
-              <span className={`inline-block mt-2 text-[10px] px-2 py-0.5 rounded-md font-mono ${preset.tagClass}`}>
+              <span className={`inline-block mt-2 text-[10px] px-1.5 py-0.5 rounded font-mono ${preset.tagClass}`}>
                 {preset.tag}
               </span>
             </button>

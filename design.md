@@ -1,55 +1,58 @@
-# Claude Design System — CodeMorph Specification
+# CodeMorph Design System Specification
 
-An editorial, warm, highly polished design system inspired by Anthropic's Claude interface, tailored for autonomous developer tools.
+A clean, minimal, editorial design system tailored for autonomous developer tools and multi-agent remediation workflows.
 
 ---
 
-## 🎨 1. Color Palette & Philosophy
+## 🎨 1. Design Tokens & Color Palette
 
-Claude's aesthetic avoids cold blue/cyan tech clichés, garish neon accents, and harsh purple glows. It embraces **warmth, intelligence, humanism, and serene clarity**.
+The CodeMorph visual system prioritizes clarity, high contrast, and serene minimalism with true black canvas and signature coral accents.
 
 ### Primary Surfaces & Canvas
-- **Canvas / Background**: `hsl(30, 7%, 6%)` (`#0f0f0e`) — Deep, warm espresso black
-- **Card Surface**: `hsl(30, 6%, 10%)` (`#191816`) — Warm charcoal/onyx
-- **Elevated Surface**: `hsl(30, 5%, 14%)` (`#242320`) — Subtle warm slate
-- **Subtle Hairline Borders**: `hsl(30, 6%, 20%)` (`#34322e`) or `rgba(255, 255, 255, 0.08)`
+- **Background / Canvas**: True Black (`#000000`)
+- **Card Surface**: Dark Neutral Charcoal (`#121212`)
+- **Elevated Surface**: Neutral Slate (`#161616` / `#1a1a1a`)
+- **Subtle Hairline Borders**: Subtle Neutral (`#262626` / `#333333`)
 
-### Signature Accents
-- **Claude Terracotta / Coral Primary**: `hsl(16, 68%, 56%)` (`#d97757`)
-- **Terracotta Hover**: `hsl(16, 72%, 50%)` (`#c96442`)
-- **Terracotta Glow / Soft Tint**: `rgba(217, 119, 87, 0.15)`
-- **Sand / Parchment Highlights**: `hsl(40, 20%, 90%)` (`#eae7df`)
-- **Muted Sand Text**: `hsl(36, 12%, 65%)` (`#a8a49a`)
-- **Subtle Amber**: `hsl(38, 92%, 50%)` (`#f59e0b`)
+### Typography & Text Colors
+- **Text Primary**: Off-White (`#f2f2f2`)
+- **Text Muted**: Neutral Grey (`#b6b6b6`)
+- **Link Dark**: Soft Cyan-Blue (`#82b6ff`)
 
-### Semantic Indicators
-- **Verified / Passed**: Sage Green `hsl(142, 40%, 55%)` (`#52b788`) / Background `rgba(82, 183, 136, 0.12)`
-- **Vulnerability / Critical**: Warm Rust Crimson `hsl(0, 65%, 58%)` (`#e05353`) / Background `rgba(224, 83, 83, 0.12)`
-- **Self-Healing / Retrying**: Warm Ochre / Amber `hsl(38, 80%, 55%)` (`#e09f3e`) / Background `rgba(224, 159, 62, 0.12)`
-- **AST / Blueprint**: Warm Clay `hsl(24, 50%, 60%)` (`#c87d55`)
+### Signature Brand Accents
+- **Brand Coral**: `#d97757`
+- **Brand Coral Hover**: `#c96442`
+- **Brand Coral Soft Tint / Glow**: `rgba(217, 119, 87, 0.15)`
 
----
-
-## ✍️ 2. Typography
-
-- **Display / Hero Headings**: Elegant serif styling (`Newsreader`, `Georgia`, or `Charter` style with graceful curves) paired with clean geometric humanistic sans.
-- **Body & Controls**: Clean, high-legibility sans (`Inter`, system UI font) with relaxed line-heights and slight letter-spacing.
-- **Code & Logs**: Monospaced font (`JetBrains Mono`, `Fira Code`, `Consolas`) with soft syntax contrast.
+### Semantic Status Indicators
+- **Verified / Passed**: Sage Green `#52b788` / `rgba(82, 183, 136, 0.12)`
+- **Vulnerability / Critical**: Rust Crimson `#e05353` / `rgba(224, 83, 83, 0.12)`
+- **Self-Healing / Retrying / Warning**: Amber Ochre `#e09f3e` / `rgba(224, 159, 62, 0.12)`
 
 ---
 
-## 🔲 3. Surface & Card Architecture
+## ✍️ 2. Typography Scale
 
-- Hairline 1px borders with warm subtle alpha channels (`border-[#34322e]`).
-- Rounded corners (`rounded-2xl` for containers, `rounded-xl` for inner controls).
-- Subtle, soft ambient shadows without hard glowing outlines.
-- Ample whitespace (24px–32px container padding) to let content breathe.
+The typographic scale uses high-performance system-ui fonts with precise line-heights and weights for maximum legibility across dense developer dashboards:
+
+- **display-h1**: `system-ui`, 40px, font-weight 600, line-height 50px
+- **heading-h2**: `system-ui`, 24px, font-weight 600, line-height 30px
+- **body**: `system-ui`, 16px, font-weight 400, line-height 24px
+- **body-compact**: `system-ui`, 16px, font-weight 400, line-height 18.4px
+- **caption-footer / monospace**: `system-ui` / `monospace`, 12px, font-weight 400, line-height 18px
 
 ---
 
-## ⚡ 4. Interactions & Micro-Animations
+## 🔲 3. Shapes & Surface Geometry
 
-- Smooth button transitions (150ms ease-out).
-- Subtle scale on hover (`scale-[1.01]`).
-- Gentle pulsing organic indicators for live agent execution states.
-- Clean split/unified diff view with muted warm tints for additions and deletions.
+- **Minimal Flat Elevation**: Clean borders (`1px solid #262626` / `#333333`) and flat elevations without decorative neon halos or oversized glow effects.
+- **Corner Radii**: Clean, subtle radii (`rounded-lg` 8px to `rounded-xl` 12px for cards, `rounded-md` 6px for tags and buttons).
+- **Whitespace & Rhythm**: Balanced padding (16px–24px) for crisp scanning and rapid visual evaluation.
+
+---
+
+## ⚡ 4. Interactions & Motion
+
+- **Transitions**: Snappy 150ms ease-out button and link transitions.
+- **Diff Presentation**: High-contrast split and unified diff rendering with clean green/red additions and subtractions.
+- **Live Agent Indicators**: Discrete pulsing status dots and spinner badges.
