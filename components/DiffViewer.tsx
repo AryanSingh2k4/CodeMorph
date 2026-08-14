@@ -36,10 +36,12 @@ function computeSimpleDiff(original: string, patched: string): DiffLine[] {
         i++
         j++
       } else {
+        // Lookahead to check if it's an addition or replacement
         const nextMatchInPatched = patchedLines.indexOf(originalLines[i], j)
         const nextMatchInOriginal = originalLines.indexOf(patchedLines[j], i)
 
         if (nextMatchInPatched !== -1 && (nextMatchInOriginal === -1 || nextMatchInPatched - j < nextMatchInOriginal - i)) {
+          // Added lines in patched
           while (j < nextMatchInPatched) {
             diff.push({
               type: 'added',
@@ -49,6 +51,7 @@ function computeSimpleDiff(original: string, patched: string): DiffLine[] {
             j++
           }
         } else if (nextMatchInOriginal !== -1) {
+          // Removed lines from original
           while (i < nextMatchInOriginal) {
             diff.push({
               type: 'removed',
@@ -58,6 +61,7 @@ function computeSimpleDiff(original: string, patched: string): DiffLine[] {
             i++
           }
         } else {
+          // Changed line: show removal then addition
           diff.push({
             type: 'removed',
             leftLineNum: i + 1,
@@ -109,9 +113,9 @@ export default function DiffViewer({ files, initialSelectedFile }: DiffViewerPro
 
   if (!selectedFile) {
     return (
-      <div className="p-10 text-center bg-[#121212] border border-[#262626] rounded-xl">
-        <Sparkles className="w-6 h-6 text-[#666666] mx-auto mb-2" />
-        <p className="text-sm text-[#b6b6b6] font-sans">No files ready for patch diff inspection.</p>
+      <div className="p-12 text-center bg-[#181715] border border-[#2e2a24] rounded-2xl shadow-warm">
+        <Sparkles className="w-8 h-8 text-sand-600 mx-auto mb-2" />
+        <p className="text-sm text-sand-400 font-sans">No files ready for patch diff inspection.</p>
       </div>
     )
   }
@@ -128,9 +132,9 @@ export default function DiffViewer({ files, initialSelectedFile }: DiffViewerPro
   const removedCount = diffLines.filter(l => l.type === 'removed').length
 
   return (
-    <div className="space-y-3 font-sans">
+    <div className="space-y-4 font-sans">
       {/* File Navigation Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#121212] border border-[#262626] p-2.5 rounded-xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#181715] border border-[#2e2a24] p-3 rounded-2xl shadow-warm">
         {/* File Tabs */}
         <div className="flex items-center space-x-2 overflow-x-auto">
           {files.map((file) => {
@@ -141,17 +145,17 @@ export default function DiffViewer({ files, initialSelectedFile }: DiffViewerPro
               <button
                 key={file.id || file.file_path}
                 onClick={() => setSelectedFilePath(file.file_path)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-mono flex items-center space-x-2 transition-all shrink-0 ${
+                className={`px-3 py-1.5 rounded-xl text-xs font-mono flex items-center space-x-2 transition-all shrink-0 ${
                   isSelected
-                    ? 'bg-coral-500 text-white font-medium shadow-coral'
-                    : 'bg-[#161616] text-[#b6b6b6] hover:bg-[#1a1a1a] hover:text-[#f2f2f2] border border-[#262626]'
+                    ? 'bg-terracotta-500 text-white font-medium shadow-terracotta'
+                    : 'bg-[#22201c] text-sand-300 hover:bg-[#2a2722] hover:text-white border border-[#343029]'
                 }`}
               >
                 <FileCode className="w-3.5 h-3.5" />
                 <span>{file.file_path}</span>
                 {hasPatch && (
                   <span
-                    className={`text-[9px] px-1.5 py-0.2 rounded font-semibold uppercase ${
+                    className={`text-[9px] px-1.5 py-0.2 rounded-md font-semibold uppercase ${
                       isSelected ? 'bg-black/30 text-white' : 'bg-sage-950 text-sage-400 border border-sage-500/30'
                     }`}
                   >
@@ -166,7 +170,7 @@ export default function DiffViewer({ files, initialSelectedFile }: DiffViewerPro
         {/* View Controls & Stats */}
         <div className="flex items-center space-x-3 shrink-0">
           {selectedFile?.patched_content && (
-            <div className="flex items-center space-x-2 text-xs font-mono text-[#b6b6b6]">
+            <div className="flex items-center space-x-2 text-xs font-mono text-sand-400">
               <span className="text-sage-400">+{addedCount}</span>
               <span className="text-rust-400">-{removedCount}</span>
             </div>
@@ -174,19 +178,19 @@ export default function DiffViewer({ files, initialSelectedFile }: DiffViewerPro
 
           <button
             onClick={() => setSplitView(!splitView)}
-            className="p-1.5 rounded-lg bg-[#161616] hover:bg-[#1a1a1a] text-[#b6b6b6] border border-[#262626] text-xs flex items-center space-x-1.5 transition-colors"
+            className="p-2 rounded-xl bg-[#22201c] hover:bg-[#2a2722] text-sand-300 border border-[#343029] text-xs flex items-center space-x-1.5 transition-colors"
             title="Toggle Split / Unified View"
           >
-            {splitView ? <Split className="w-3.5 h-3.5 text-coral-500" /> : <Columns className="w-3.5 h-3.5 text-coral-500" />}
+            {splitView ? <Split className="w-3.5 h-3.5 text-terracotta-500" /> : <Columns className="w-3.5 h-3.5 text-terracotta-500" />}
             <span>{splitView ? 'Split' : 'Unified'}</span>
           </button>
 
           {selectedFile?.patched_content && (
             <button
               onClick={handleCopyPatched}
-              className="p-1.5 rounded-lg bg-[#161616] hover:bg-[#1a1a1a] text-[#b6b6b6] border border-[#262626] text-xs flex items-center space-x-1.5 transition-colors"
+              className="p-2 rounded-xl bg-[#22201c] hover:bg-[#2a2722] text-sand-300 border border-[#343029] text-xs flex items-center space-x-1.5 transition-colors"
             >
-              {copied ? <Check className="w-3.5 h-3.5 text-sage-400" /> : <Copy className="w-3.5 h-3.5 text-[#8c8c8c]" />}
+              {copied ? <Check className="w-3.5 h-3.5 text-sage-400" /> : <Copy className="w-3.5 h-3.5 text-sand-400" />}
               <span>{copied ? 'Copied' : 'Copy'}</span>
             </button>
           )}
@@ -194,27 +198,27 @@ export default function DiffViewer({ files, initialSelectedFile }: DiffViewerPro
       </div>
 
       {/* Diff View Box */}
-      <div className="rounded-xl border border-[#262626] overflow-hidden bg-[#000000] font-mono text-xs">
-        <div className="bg-[#121212] px-4 py-2 border-b border-[#262626] flex items-center justify-between">
-          <div className="flex items-center space-x-2 text-[#b6b6b6] font-mono text-xs">
+      <div className="rounded-2xl border border-[#2e2a24] overflow-hidden bg-[#121110] shadow-warm font-mono text-xs">
+        <div className="bg-[#181715] px-4 py-2.5 border-b border-[#2e2a24] flex items-center justify-between">
+          <div className="flex items-center space-x-2 text-sand-300 font-mono text-xs">
             <span className="text-rust-400 font-medium flex items-center space-x-1">
               <Minus className="w-3 h-3" />
-              <span>Original</span>
+              <span>Original Source</span>
             </span>
-            <span className="text-[#333333]">|</span>
+            <span className="text-sand-600">|</span>
             <span className="text-sage-400 font-medium flex items-center space-x-1">
               <Plus className="w-3 h-3" />
-              <span>Patched</span>
+              <span>Remediated Patch</span>
             </span>
           </div>
 
-          <span className="text-caption text-[#8c8c8c] font-mono">
+          <span className="text-[11px] text-sand-500 font-mono">
             {selectedFile.file_path}
           </span>
         </div>
 
         {selectedFile.patched_content ? (
-          <div className="overflow-x-auto text-[12px] bg-[#000000] divide-y divide-[#161616]">
+          <div className="overflow-x-auto text-[13px] bg-[#121110] divide-y divide-[#1e1c19]/50">
             {diffLines.map((line, idx) => {
               const isAdded = line.type === 'added'
               const isRemoved = line.type === 'removed'
@@ -224,22 +228,22 @@ export default function DiffViewer({ files, initialSelectedFile }: DiffViewerPro
                   key={idx}
                   className={`flex items-stretch font-mono leading-relaxed transition-colors ${
                     isAdded
-                      ? 'bg-sage-950/30 text-sage-300 hover:bg-sage-950/50'
+                      ? 'bg-sage-950/25 text-sage-300 hover:bg-sage-950/40'
                       : isRemoved
-                      ? 'bg-rust-950/30 text-rust-300 hover:bg-rust-950/50'
-                      : 'text-[#b6b6b6] hover:bg-[#121212]'
+                      ? 'bg-rust-950/25 text-rust-300 hover:bg-rust-950/40'
+                      : 'text-sand-300 hover:bg-[#181715]/60'
                   }`}
                 >
                   {/* Line Numbers */}
-                  <div className="w-11 py-1 pr-2 text-right text-[#666666] select-none bg-[#0a0a0a] border-r border-[#262626] text-[11px] shrink-0">
+                  <div className="w-12 py-1 pr-2 text-right text-sand-600 select-none bg-[#161513] border-r border-[#262420] text-[11px] shrink-0">
                     {line.leftLineNum || ''}
                   </div>
-                  <div className="w-11 py-1 pr-2 text-right text-[#666666] select-none bg-[#0a0a0a] border-r border-[#262626] text-[11px] shrink-0">
+                  <div className="w-12 py-1 pr-2 text-right text-sand-600 select-none bg-[#161513] border-r border-[#262420] text-[11px] shrink-0">
                     {line.rightLineNum || ''}
                   </div>
 
                   {/* Marker */}
-                  <div className="w-5 py-1 text-center font-bold select-none shrink-0 text-xs">
+                  <div className="w-6 py-1 text-center font-bold select-none shrink-0 text-xs">
                     {isAdded ? '+' : isRemoved ? '-' : ' '}
                   </div>
 
@@ -252,11 +256,11 @@ export default function DiffViewer({ files, initialSelectedFile }: DiffViewerPro
             })}
           </div>
         ) : (
-          <div className="p-6 text-center bg-[#000000]">
-            <p className="text-[#8c8c8c] text-caption">
+          <div className="p-8 text-center bg-[#121110]">
+            <p className="text-sand-500 text-xs">
               No modifications needed for this file. Original source is unaltered.
             </p>
-            <pre className="mt-3 p-3 rounded-lg bg-[#121212] border border-[#262626] text-left text-[#b6b6b6] text-caption overflow-x-auto font-mono">
+            <pre className="mt-4 p-4 rounded-xl bg-[#181715] border border-[#2e2a24] text-left text-sand-300 text-xs overflow-x-auto font-mono">
               {selectedFile.original_content}
             </pre>
           </div>

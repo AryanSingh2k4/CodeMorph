@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Asterisk, Github } from 'lucide-react'
+import { ShieldCheck, Github, Sparkles } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 export default function Navbar() {
@@ -48,39 +48,41 @@ export default function Navbar() {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-[#262626] bg-[#000000]/90 backdrop-blur-md transition-all">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
+    <header className="sticky top-0 z-50 w-full border-b border-[#282622] bg-[#0f0f0e]/90 backdrop-blur-md transition-all">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Brand Logo */}
         <div className="flex items-center space-x-6">
-          <Link href="/" className="flex items-center space-x-2.5 group">
-            <div className="w-8 h-8 rounded-lg bg-[#121212] border border-[#262626] group-hover:border-coral-500/50 flex items-center justify-center text-coral-500 transition-colors">
-              <Asterisk className="w-4 h-4 text-coral-500" />
+          <Link href="/" className="flex items-center space-x-3 group">
+            <div className="w-9 h-9 rounded-xl bg-[#1d1b18] border border-[#38342e] group-hover:border-terracotta-500/50 flex items-center justify-center text-terracotta-500 transition-all shadow-sm">
+              <ShieldCheck className="w-5 h-5" />
             </div>
-            <div className="flex items-center space-x-2">
-              <span className="font-semibold text-base text-[#f2f2f2] tracking-tight group-hover:text-coral-400 transition-colors">
-                CodeMorph
-              </span>
-              <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-[#161616] text-[#b6b6b6] border border-[#262626] font-medium">
-                v1.0
-              </span>
+            <div>
+              <div className="flex items-center space-x-2">
+                <span className="font-serif font-semibold text-lg text-sand-100 tracking-normal group-hover:text-terracotta-400 transition-colors">
+                  Code<span className="text-terracotta-500 font-normal italic">Morph</span>
+                </span>
+                <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded-md bg-[#24211c] text-sand-300 border border-[#38342e] font-medium tracking-wide">
+                  Autonomous Core
+                </span>
+              </div>
             </div>
           </Link>
 
           {/* Navigation Links */}
-          <nav className="hidden md:flex items-center space-x-1 pl-4 border-l border-[#262626]">
+          <nav className="hidden md:flex items-center space-x-1 pl-4 border-l border-[#282622]">
             <Link
               href="/dashboard"
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                 pathname.startsWith('/dashboard')
-                  ? 'bg-[#161616] text-[#f2f2f2] border border-[#333333]'
-                  : 'text-[#b6b6b6] hover:text-[#f2f2f2] hover:bg-[#121212]'
+                  ? 'bg-[#22201c] text-sand-100 border border-[#36332d]'
+                  : 'text-sand-400 hover:text-sand-200 hover:bg-[#1a1815]'
               }`}
             >
               Dashboard
             </Link>
             <Link
               href="/dashboard?new=true"
-              className="px-3 py-1.5 rounded-lg text-xs font-medium text-[#b6b6b6] hover:text-[#f2f2f2] hover:bg-[#121212] transition-colors"
+              className="px-3 py-1.5 rounded-lg text-xs font-medium text-sand-400 hover:text-sand-200 hover:bg-[#1a1815] transition-colors"
             >
               New Scan
             </Link>
@@ -89,37 +91,38 @@ export default function Navbar() {
 
         {/* Right Action Area */}
         <div className="flex items-center space-x-3">
-          <div className="hidden lg:flex items-center space-x-2 px-2.5 py-1 rounded-md bg-[#121212] border border-[#262626] text-[11px] text-[#b6b6b6] font-mono">
+          <div className="hidden lg:flex items-center space-x-2 px-3 py-1 rounded-full bg-[#181715] border border-[#2b2823] text-[11px] text-sand-400 font-mono">
             <span className="w-1.5 h-1.5 rounded-full bg-sage-500 animate-pulse"></span>
             <span>Sandbox VM: Ready</span>
           </div>
 
           {user ? (
             <div className="flex items-center space-x-3">
-              <div className="flex items-center space-x-2 px-3 py-1 rounded-lg bg-[#121212] border border-[#262626]">
-                <div className="w-5 h-5 rounded bg-coral-500/20 text-coral-400 flex items-center justify-center text-xs font-bold font-mono">
+              <div className="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-[#1a1815] border border-[#2e2a24]">
+                <div className="w-5 h-5 rounded-full bg-terracotta-500/20 text-terracotta-400 flex items-center justify-center text-xs font-bold font-mono">
                   {user.email?.[0]?.toUpperCase() || 'U'}
                 </div>
-                <span className="text-xs text-[#f2f2f2] max-w-[120px] truncate">{user.email || 'GitHub User'}</span>
+                <span className="text-xs text-sand-300 max-w-[120px] truncate">{user.email || 'GitHub User'}</span>
               </div>
               <button
                 onClick={handleSignOut}
-                className="text-xs text-[#b6b6b6] hover:text-rust-400 transition-colors px-2 py-1"
+                className="text-xs text-sand-400 hover:text-rust-400 transition-colors px-2 py-1"
               >
                 Sign Out
               </button>
             </div>
           ) : (
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2.5">
               <Link
                 href="/dashboard"
-                className="hidden sm:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-[#121212] hover:bg-[#161616] border border-[#262626] text-xs font-medium text-[#f2f2f2] transition-colors"
+                className="hidden sm:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-[#191816] hover:bg-[#23211d] border border-[#312f2a] text-xs font-medium text-sand-300 hover:text-sand-100 transition-colors"
               >
-                <span>Console</span>
+                <Sparkles className="w-3.5 h-3.5 text-terracotta-400" />
+                <span>Playground</span>
               </Link>
               <button
                 onClick={handleSignIn}
-                className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-lg bg-coral-500 hover:bg-coral-600 text-white font-medium text-xs transition-all shadow-coral"
+                className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-xl bg-terracotta-500 hover:bg-terracotta-600 text-white font-medium text-xs transition-all shadow-terracotta"
               >
                 <Github className="w-3.5 h-3.5 text-white" />
                 <span>Sign in with GitHub</span>
