@@ -175,5 +175,158 @@ export async function runSafeCommand(binary: string, args: string[]) {
     }, null, 2)
   }
 
+  if (systemContent.includes('Test') || systemContent.includes('test') || systemContent.includes('QA') || systemContent.includes('Remediation')) {
+    // Test Synthesizer Agent Simulation
+    return JSON.stringify({
+      tests: [
+        {
+          file_path: 'src/routes/auth.test.ts',
+          framework: 'vitest',
+          test_content: `import { describe, it, expect, vi, beforeEach } from 'vitest';
+import request from 'supertest';
+import express from 'express';
+import authRouter from './auth';
+import { db } from '../database';
+
+vi.mock('../database', () => ({
+  db: {
+    query: vi.fn(),
+    raw: vi.fn()
+  }
+}));
+
+describe('Auth Route Security & Functionality Verification', () => {
+  let app: express.Express;
+
+  beforeEach(() => {
+    app = express();
+    app.use(express.json());
+    app.use('/auth', authRouter);
+    vi.clearAllMocks();
+  });
+
+  describe('Security Remediation - SQL Injection Prevention', () => {
+    it('should reject SQL injection payloads in login credentials without raw query execution', async () => {
+      const maliciousPayload = {
+        username: "admin' OR '1'='1",
+        password: "' OR '1'='1"
+      };
+
+      (db.query as any).mockResolvedValue({
+        rowCount: 0,
+        rows: []
+      });
+
+      const res = await request(app)
+        .post('/auth/login')
+        .send(maliciousPayload);
+
+      expect(res.status).toBe(401);
+      expect(res.body).toEqual({ error: 'Invalid credentials' });
+      expect(db.query).toHaveBeenCalledWith(
+        expect.stringContaining('SELECT id, username, email FROM users WHERE username = $1 AND password = $2'),
+        [maliciousPayload.username, maliciousPayload.password]
+      );
+      expect(db.raw).not.toHaveBeenCalled();
+    });
+
+    it('should reject invalid payload structures with 400 Bad Request', async () => {
+      const invalidPayload = {
+        username: 12345,
+        password: true
+      };
+
+      const res = await request(app)
+        .post('/auth/login')
+        .send(invalidPayload);
+
+      expect(res.status).toBe(400);
+      expect(res.body).toHaveProperty('error');
+    });
+  });
+
+  describe('Business Logic Integrity', () => {
+    it('should successfully authenticate valid user and return jwt session token', async () => {
+      const validUser = { id: 1, username: 'johndoe', email: 'john@example.com' };
+      (db.query as any).mockResolvedValue({
+        rowCount: 1,
+        rows: [validUser]
+      });
+
+      const res = await request(app)
+        .post('/auth/login')
+        .send({
+          username: 'johndoe',
+          password: 'CorrectPassword123!'
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty('token', 'jwt-session-token');
+      expect(res.body.user).toEqual(validUser);
+    });
+  });
+});`
+        },
+        {
+          file_path: 'src/components/UserProfile.test.tsx',
+          framework: 'vitest',
+          test_content: `import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, waitFor } from '@testing-library/react';
+import React from 'react';
+import UserProfile from './UserProfile';
+
+describe('UserProfile Component Security & Functionality Verification', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  describe('Security Remediation - XSS Prevention', () => {
+    it('should safely render user bio without executing malicious HTML or script tags', async () => {
+      const xssPayload = '<img src=x onerror=alert(1)>';
+      const mockUser = {
+        name: 'Alice Security',
+        bio: xssPayload
+      };
+
+      global.fetch = vi.fn().mockResolvedValue({
+        json: vi.fn().mockResolvedValue(mockUser)
+      } as any);
+
+      render(<UserProfile userId="user-42" />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Alice Security')).toBeDefined();
+      });
+
+      const bioElement = screen.getByText(xssPayload);
+      expect(bioElement).toBeDefined();
+      expect(bioElement.className).toContain('bio-text');
+      expect(document.querySelector('img')).toBeNull();
+    });
+  });
+
+  describe('Modern Functional Component & Lifecycle', () => {
+    it('should display loading state before profile data arrives', () => {
+      global.fetch = vi.fn().mockReturnValue(new Promise(() => {}));
+      render(<UserProfile userId="user-99" />);
+      expect(screen.getByText('Loading...')).toBeDefined();
+    });
+
+    it('should handle fetch failures gracefully without crashing', async () => {
+      global.fetch = vi.fn().mockRejectedValue(new Error('Network error'));
+      render(<UserProfile userId="user-error" />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Error loading profile')).toBeDefined();
+      });
+    });
+  });
+});`
+        }
+      ]
+    }, null, 2)
+  }
+
   return jsonMode ? '{}' : 'Simulated AI Response'
 }
+

@@ -93,6 +93,18 @@ export interface PatchItem {
   summary: string
 }
 
+export type Patch = PatchItem
+
+export interface RemediationTest {
+  file_path: string
+  test_content: string
+  framework: 'jest' | 'vitest' | 'pytest'
+}
+
+export interface TestGeneratorOutput {
+  tests: RemediationTest[]
+}
+
 export interface PatcherOutput {
   patches: PatchItem[]
 }

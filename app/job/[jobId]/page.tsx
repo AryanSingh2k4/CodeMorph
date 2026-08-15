@@ -15,7 +15,8 @@ import {
   CheckCircle2, 
   AlertTriangle,
   Loader2,
-  Clock
+  Clock,
+  FileDown
 } from 'lucide-react'
 import StatusTimeline from '@/components/StatusTimeline'
 import FindingsList from '@/components/FindingsList'
@@ -192,6 +193,18 @@ export default function JobDetailPage() {
           >
             <RefreshCw className="w-4 h-4" />
           </button>
+
+          {/* Download Security Report Button */}
+          <a
+            href={`/api/job/${jobId}/report?download=true`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center space-x-1.5 px-4 py-2.5 rounded-xl bg-[#1d1b18] hover:bg-[#282520] border border-[#38342e] text-sand-200 text-xs font-medium transition-colors shadow-sm"
+            title="Download Executive Security Audit Report (Markdown)"
+          >
+            <FileDown className="w-4 h-4 text-terracotta-400" />
+            <span className="hidden sm:inline">Export Report</span>
+          </a>
 
           {/* Open PR Button */}
           <button

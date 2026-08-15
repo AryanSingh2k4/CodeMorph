@@ -1,11 +1,16 @@
 import * as babelParser from '@babel/parser'
 import _traverse from '@babel/traverse'
 import { ASTSummary } from '@/types'
+import { parsePythonCode } from './python-parser'
 
 // Handle default or direct export of babel traverse across bundlers
 const traverse = typeof _traverse === 'function' ? _traverse : (_traverse as any).default || _traverse
 
 export function parseFileAST(content: string, filePath: string): ASTSummary {
+  if (filePath.endsWith('.py')) {
+    return parsePythonCode(content, filePath)
+  }
+
   const summary: ASTSummary = {
     imports: [],
     functions: [],
