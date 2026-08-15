@@ -30,9 +30,12 @@ export async function runPatcherAgent(
   errorContext?: string
 ): Promise<PatcherOutput> {
   // Group findings by file
-  const findingsByFile = findings.reduce((acc, f) => {
-    if (!acc[f.file_path]) acc[f.file_path] = []
-    acc[f.file_path].push(f)
+  const findingsByFile = findings.reduce((acc, f: any) => {
+    const key = f.file_path || f.file
+    if (key) {
+      if (!acc[key]) acc[key] = []
+      acc[key].push(f)
+    }
     return acc
   }, {} as Record<string, Finding[]>)
 
