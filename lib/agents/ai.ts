@@ -3,15 +3,31 @@ export interface AIMessage {
   content: string
 }
 
-export async function callAI(messages: AIMessage[], jsonMode = false): Promise<string> {
+// Rate limiting queue state to stay safely under Google AI Studio limits (30 RPM / 16K TPM)
+let lastCallTimestamp = 0
+const MIN_CALL_INTERVAL_MS = 1500 // Ensures max ~20 RPM
+
+async function enforceRateLimitPacing() {
+  const now = Date.now()
+  const timeSinceLastCall = now - lastCallTimestamp
+  if (timeSinceLastCall < MIN_CALL_INTERVAL_MS) {
+    const delay = MIN_CALL_INTERVAL_MS - timeSinceLastCall
+    await new Promise((resolve) => setTimeout(resolve, delay))
+  }
+  lastCallTimestamp = Date.now()
+}
+
+export async function callAI(messages: AIMessage[], jsonMode = false, retryCount = 0): Promise<string> {
   const apiKey = process.env.AI_API_KEY
-  const baseUrl = (process.env.AI_API_BASE_URL || 'https://api.openai.com/v1').replace(/\/$/, '')
-  const model = process.env.AI_MODEL || 'gpt-4o-mini'
+  const baseUrl = (process.env.AI_API_BASE_URL || 'https://generativelanguage.googleapis.com/v1beta/openai').replace(/\/$/, '')
+  const model = process.env.AI_MODEL || 'gemma-4-26b-a4b-it'
 
   if (!apiKey) {
     console.warn('AI_API_KEY is not set. Generating intelligent simulated response for testing.')
     return generateFallbackAIResponse(messages, jsonMode)
   }
+
+  await enforceRateLimitPacing()
 
   try {
     const payload: Record<string, any> = {
@@ -19,11 +35,6 @@ export async function callAI(messages: AIMessage[], jsonMode = false): Promise<s
       messages,
       temperature: 0.1,
       max_tokens: 4000
-    }
-
-    // Only add response_format if jsonMode is requested and provider supports it
-    if (jsonMode) {
-      payload.response_format = { type: 'json_object' }
     }
 
     const response = await fetch(`${baseUrl}/chat/completions`, {
@@ -34,6 +45,12 @@ export async function callAI(messages: AIMessage[], jsonMode = false): Promise<s
       },
       body: JSON.stringify(payload)
     })
+
+    if (response.status === 429 && retryCount < 3) {
+      console.warn(`Rate limit reached (429). Retrying in ${(retryCount + 1) * 3} seconds...`)
+      await new Promise((resolve) => setTimeout(resolve, (retryCount + 1) * 3000))
+      return callAI(messages, jsonMode, retryCount + 1)
+    }
 
     if (!response.ok) {
       const errText = await response.text()
@@ -54,15 +71,34 @@ export async function callAI(messages: AIMessage[], jsonMode = false): Promise<s
 }
 
 /**
- * Strips markdown code block wrappers (e.g. ```json ... ```) if an LLM returns them
+ * Robust JSON extraction: Strips thought tags (<thought>...</thought>), markdown blocks, and isolates JSON body
  */
 export function cleanJsonResponse(raw: string): string {
   let cleaned = raw.trim()
+  
+  // Remove reasoning model thought tags (<thought>...</thought> or <think>...</think>)
+  cleaned = cleaned.replace(/<thought>[\s\S]*?<\/thought>/gi, '').trim()
+  cleaned = cleaned.replace(/<think>[\s\S]*?<\/think>/gi, '').trim()
+
+  // Remove markdown codeblock fences
   if (cleaned.startsWith('```json')) {
     cleaned = cleaned.replace(/^```json\s*/, '').replace(/\s*```$/, '')
   } else if (cleaned.startsWith('```')) {
     cleaned = cleaned.replace(/^```\s*/, '').replace(/\s*```$/, '')
   }
+
+  // Extract cleanest JSON substring (object or array)
+  const firstBrace = cleaned.indexOf('{')
+  const lastBrace = cleaned.lastIndexOf('}')
+  const firstBracket = cleaned.indexOf('[')
+  const lastBracket = cleaned.lastIndexOf(']')
+
+  if (firstBrace !== -1 && lastBrace !== -1 && (firstBracket === -1 || firstBrace < firstBracket)) {
+    cleaned = cleaned.substring(firstBrace, lastBrace + 1)
+  } else if (firstBracket !== -1 && lastBracket !== -1) {
+    cleaned = cleaned.substring(firstBracket, lastBracket + 1)
+  }
+
   return cleaned.trim()
 }
 
