@@ -7,7 +7,7 @@ export interface IngestedFile {
   ast_summary: ASTSummary
 }
 
-const ALLOWED_EXTENSIONS = ['.js', '.ts', '.tsx', '.jsx', '.mjs', '.cjs']
+const ALLOWED_EXTENSIONS = ['.js', '.ts', '.tsx', '.jsx', '.mjs', '.cjs', '.py']
 const MAX_FILES = 30
 const MAX_FILE_SIZE = 60000 // 60KB limit per file for LLM context management
 
@@ -61,7 +61,7 @@ export async function ingestRepo(
       .slice(0, MAX_FILES)
 
     if (sourceFiles.length === 0) {
-      throw new Error('No supported JavaScript/TypeScript source files found in repository.')
+      throw new Error('No supported JavaScript/TypeScript/Python source files found in repository.')
     }
 
     // 4. Fetch content in concurrent batches of 5

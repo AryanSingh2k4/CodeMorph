@@ -197,13 +197,12 @@ export default function JobDetailPage() {
           {/* Download Security Report Button */}
           <a
             href={`/api/job/${jobId}/report?download=true`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center space-x-1.5 px-4 py-2.5 rounded-xl bg-[#1d1b18] hover:bg-[#282520] border border-[#38342e] text-sand-200 text-xs font-medium transition-colors shadow-sm"
-            title="Download Executive Security Audit Report (Markdown)"
+            download={`codemorph-security-report-${job.repo_name}.md`}
+            className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-[#181715] hover:bg-[#22201c] border border-[#2e2a24] hover:border-terracotta-500/40 text-sand-200 hover:text-sand-100 text-xs font-medium transition-all shadow-sm group shrink-0"
+            title="Download Executive Security Audit Report"
           >
-            <FileDown className="w-4 h-4 text-terracotta-400" />
-            <span className="hidden sm:inline">Export Report</span>
+            <FileDown className="w-4 h-4 text-terracotta-500 group-hover:scale-110 transition-transform" />
+            <span>Download Security Report</span>
           </a>
 
           {/* Open PR Button */}

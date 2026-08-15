@@ -1,6 +1,7 @@
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { mockDb } from '@/lib/supabase/mock-store'
-import { NextRequest, NextResponse } from 'next/server'
+import { generateReportData, generateMarkdownReport, generateHtmlReport } from '@/lib/report/generator'
 import { Job, JobFile, Finding, SandboxRun } from '@/types'
 
 export const dynamic = 'force-dynamic'
@@ -10,145 +11,114 @@ export async function GET(
   { params }: { params: { jobId: string } }
 ) {
   const { jobId } = params
-  const { searchParams } = new URL(req.url)
-  const isDownload = searchParams.get('download') === 'true'
+
+  if (!jobId) {
+    return NextResponse.json({ error: 'Job ID is required' }, { status: 400 })
+  }
 
   let job: Job | null = null
   let files: JobFile[] = []
   let findings: Finding[] = []
   let runs: SandboxRun[] = []
 
-  const supabase = createClient()
-
-  if (mockDb.getJob(jobId)) {
-    job = mockDb.getJob(jobId) || null
+  // 1. Check in-memory mock store for demo jobs
+  const mockJob = mockDb.getJob(jobId)
+  if (mockJob) {
+    job = mockJob
     files = mockDb.getFiles(jobId)
     findings = mockDb.getFindings(jobId)
     runs = mockDb.getRuns(jobId)
   } else {
-    const { data: jobData } = await supabase.from('jobs').select('*').eq('id', jobId).single()
-    job = jobData as Job | null
+    // 2. Fetch from Supabase database
+    try {
+      const supabase = createClient()
+      const { data: dbJob, error: jobErr } = await supabase
+        .from('jobs')
+        .select('*')
+        .eq('id', jobId)
+        .single()
 
-    if (job) {
-      const [filesRes, findingsRes, runsRes] = await Promise.all([
-        supabase.from('job_files').select('*').eq('job_id', jobId),
-        supabase.from('findings').select('*').eq('job_id', jobId),
-        supabase.from('sandbox_runs').select('*').eq('job_id', jobId).order('attempt_number', { ascending: true })
-      ])
-      files = (filesRes.data || []) as JobFile[]
-      findings = (findingsRes.data || []) as Finding[]
-      runs = (runsRes.data || []) as SandboxRun[]
+      if (jobErr || !dbJob) {
+        return NextResponse.json({ error: 'Job not found' }, { status: 404 })
+      }
+
+      job = dbJob as Job
+
+      const { data: dbFiles } = await supabase
+        .from('job_files')
+        .select('*')
+        .eq('job_id', jobId)
+
+      const { data: dbFindings } = await supabase
+        .from('findings')
+        .select('*')
+        .eq('job_id', jobId)
+
+      const { data: dbRuns } = await supabase
+        .from('sandbox_runs')
+        .select('*')
+        .eq('job_id', jobId)
+        .order('attempt_number', { ascending: true })
+
+      files = (dbFiles as JobFile[]) || []
+      findings = (dbFindings as Finding[]) || []
+      runs = (dbRuns as SandboxRun[]) || []
+    } catch (err: any) {
+      console.error('Error fetching job details for security report:', err)
+      return NextResponse.json(
+        { error: err.message || 'Failed to retrieve job report data' },
+        { status: 500 }
+      )
     }
   }
 
   if (!job) {
-    return NextResponse.json({ error: 'Job not found' }, { status: 404 })
+    return NextResponse.json({ error: 'Job record not located' }, { status: 404 })
   }
 
-  // Calculate Security Score & Metrics
-  const criticalCount = findings.filter(f => f.severity === 'critical').length
-  const highCount = findings.filter(f => f.severity === 'high').length
-  const mediumCount = findings.filter(f => f.severity === 'medium').length
-  const lowCount = findings.filter(f => f.severity === 'low').length
-  const migrationsCount = findings.filter(f => f.type === 'migration').length
+  // Parse query parameters
+  const { searchParams } = new URL(req.url)
+  const isDownload = searchParams.get('download') === 'true' || searchParams.get('download') === '1'
+  const format = (searchParams.get('format') || '').toLowerCase()
 
-  const patchedFiles = files.filter(f => f.patched_content && f.patched_content !== f.original_content)
-  const lastRun = runs[runs.length - 1]
-  const isVerified = lastRun?.status === 'passed'
+  // Generate complete report data model
+  const reportData = generateReportData(job, files, findings, runs)
+  const safeRepoName = (job.repo_name || 'report').replace(/[^a-zA-Z0-9_-]/g, '_')
+  const shortId = job.id.replace(/-/g, '').slice(0, 8)
 
-  let securityScore = 100
-  if (!isVerified) {
-    securityScore -= criticalCount * 25
-    securityScore -= highCount * 15
-    securityScore -= mediumCount * 5
-  } else {
-    // Verified patches restored score
-    securityScore = Math.max(92, 100 - (lowCount * 2))
-  }
-  securityScore = Math.max(0, Math.min(100, securityScore))
+  // Determine rendering format (Markdown vs HTML)
+  // If format=html or accessed in browser without download/format specified -> Render Executive HTML
+  // If format=md or download=true without format=html -> Render and/or Download Markdown report.md
+  if (format === 'html' || (!isDownload && format !== 'md' && format !== 'markdown')) {
+    const htmlReport = generateHtmlReport(reportData)
+    const headers: Record<string, string> = {
+      'Content-Type': 'text/html; charset=utf-8',
+      'Cache-Control': 'no-store, max-age=0'
+    }
 
-  const markdownReport = `# 🛡️ CodeMorph Executive Security & Remediation Report
+    if (isDownload) {
+      headers['Content-Disposition'] = `attachment; filename="codemorph-security-report-${safeRepoName}-${shortId}.html"`
+    }
 
-**Generated on:** ${new Date().toUTCString()}  
-**Target Repository:** \`${job.repo_owner}/${job.repo_name}\`  
-**Scan Job ID:** \`${job.id}\`  
-**Pipeline Status:** \`${job.status.toUpperCase()}\`  
-**Overall Security Health Score:** **${securityScore}/100** ${isVerified ? '✅ (VERIFIED BY SANDBOX VM)' : '⚠️'}
-
----
-
-## 1. Executive Summary
-
-CodeMorph completed an autonomous multi-agent analysis on repository **${job.repo_owner}/${job.repo_name}**. The pipeline executed AST pattern extraction, deep LLM vulnerability detection, automated patch synthesis, and sandboxed compiler verification.
-
-- **Total Source Files Analyzed:** ${files.length}
-- **Vulnerabilities Identified:** ${findings.filter(f => f.type === 'vulnerability').length} (${criticalCount} Critical, ${highCount} High, ${mediumCount} Medium, ${lowCount} Low)
-- **Modernization / Framework Migrations:** ${migrationsCount}
-- **Files Remediated & Patched:** ${patchedFiles.length}
-- **Sandbox VM Verification:** ${isVerified ? 'PASSED (0 TypeScript & ESLint errors)' : 'Pending / Failed'}
-- **Self-Healing Iterations:** ${job.attempt_count} / ${job.max_attempts}
-
----
-
-## 2. Identified Vulnerabilities & Migrations Breakdown
-
-| # | Severity | Type | Title | File & Location | Status |
-|---|---|---|---|---|---|
-${findings.map((f, i) => `| ${i + 1} | **${(f.severity || 'LOW').toUpperCase()}** | ${f.type} | ${f.title} | \`${f.file_path}${f.line_number ? `:${f.line_number}` : ''}\` | ${isVerified ? '✅ Remediated' : '⚠️ Action Required'} |`).join('\n')}
-
----
-
-## 3. Detailed Finding Descriptions
-
-${findings.map((f, i) => `
-### Finding ${i + 1}: ${f.title}
-- **Type:** \`${f.type}\`
-- **Severity:** \`${(f.severity || 'LOW').toUpperCase()}\`
-- **Target File:** \`${f.file_path}\` ${f.line_number ? `(Line: ${f.line_number})` : ''}
-- **Description:** ${f.description}
-- **Remediation Strategy:** Synthesized secure parameterization / modernized functional architecture.
-`).join('\n')}
-
----
-
-## 4. Remediated Files & Code Patches
-
-${patchedFiles.map((f, i) => `
-### Patch [${i + 1}/${patchedFiles.length}]: \`${f.file_path}\`
-
-\`\`\`${f.file_path.endsWith('.py') ? 'python' : f.file_path.endsWith('.tsx') || f.file_path.endsWith('.ts') ? 'typescript' : 'javascript'}
-${f.patched_content}
-\`\`\`
-`).join('\n')}
-
----
-
-## 5. Isolated Sandbox VM Execution Log
-
-- **GitHub Run ID:** \`${lastRun?.github_run_id || 'N/A'}\`
-- **Runner OS:** Ubuntu 22.04 LTS (Isolated VM Container)
-- **Status:** \`${lastRun?.status || 'N/A'}\`
-- **Execution Log:**
-\`\`\`text
-${lastRun?.logs || 'TypeScript: passed (0 errors) | ESLint: passed (0 errors)'}
-\`\`\`
-
----
-*Report generated autonomously by **CodeMorph Core Engine**.*
-`
-
-  if (isDownload) {
-    return new NextResponse(markdownReport, {
-      headers: {
-        'Content-Type': 'text/markdown; charset=utf-8',
-        'Content-Disposition': `attachment; filename="codemorph-security-report-${jobId}.md"`
-      }
+    return new Response(htmlReport, {
+      status: 200,
+      headers
     })
   }
 
-  return new NextResponse(markdownReport, {
-    headers: {
-      'Content-Type': 'text/markdown; charset=utf-8'
-    }
+  // Generate Markdown report
+  const markdownReport = generateMarkdownReport(reportData)
+  const headers: Record<string, string> = {
+    'Content-Type': 'text/markdown; charset=utf-8',
+    'Cache-Control': 'no-store, max-age=0'
+  }
+
+  if (isDownload) {
+    headers['Content-Disposition'] = `attachment; filename="codemorph-security-report-${safeRepoName}-${shortId}.md"`
+  }
+
+  return new Response(markdownReport, {
+    status: 200,
+    headers
   })
 }
