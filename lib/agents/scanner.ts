@@ -40,17 +40,23 @@ export async function runScannerAgent(files: JobFile[]): Promise<ScannerOutput> 
     return { vulnerabilities: [], migrations: [] }
   }
 
+  // Prioritize files that contain flagged AST patterns
+  const prioritizedFiles = [...files].sort((a, b) => {
+    const aPatterns = a.ast_summary?.patterns?.length || 0
+    const bPatterns = b.ast_summary?.patterns?.length || 0
+    return bPatterns - aPatterns
+  }).slice(0, 8) // Limit to top 8 most critical files to stay safely under 16K TPM limit
+
   // Build a compact, structured file summary for the LLM
-  const filesSummary = files.map((f, idx) => {
+  const filesSummary = prioritizedFiles.map((f, idx) => {
     const ast = f.ast_summary
-    const truncatedContent = f.original_content.length > 4000
-      ? f.original_content.slice(0, 4000) + '\n... [Remaining content truncated for brevity]'
+    const truncatedContent = f.original_content.length > 2500
+      ? f.original_content.slice(0, 2500) + '\n... [Truncated for brevity]'
       : f.original_content
 
-    return `### FILE [${idx + 1}/${files.length}]: ${f.file_path}
-- IMPORTS: ${ast?.imports?.length ? ast.imports.join(', ') : 'none'}
-- FUNCTIONS: ${ast?.functions?.length ? ast.functions.join(', ') : 'none'}
-- CLASSES: ${ast?.classNames?.length ? ast.classNames.join(', ') : 'none'}
+    return `### FILE [${idx + 1}/${prioritizedFiles.length}]: ${f.file_path}
+- IMPORTS: ${ast?.imports?.length ? ast.imports.slice(0, 8).join(', ') : 'none'}
+- FUNCTIONS: ${ast?.functions?.length ? ast.functions.slice(0, 8).join(', ') : 'none'}
 - DETECTED AST PATTERNS: ${ast?.patterns?.length ? ast.patterns.join(', ') : 'none'}
 
 \`\`\`

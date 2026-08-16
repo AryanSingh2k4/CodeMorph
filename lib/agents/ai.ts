@@ -46,9 +46,10 @@ export async function callAI(messages: AIMessage[], jsonMode = false, retryCount
       body: JSON.stringify(payload)
     })
 
-    if (response.status === 429 && retryCount < 3) {
-      console.warn(`Rate limit reached (429). Retrying in ${(retryCount + 1) * 3} seconds...`)
-      await new Promise((resolve) => setTimeout(resolve, (retryCount + 1) * 3000))
+    if (response.status === 429 && retryCount < 5) {
+      const backoffMs = (retryCount + 1) * 4000
+      console.warn(`Rate limit reached (429). Retrying in ${backoffMs / 1000}s (attempt ${retryCount + 1}/5)...`)
+      await new Promise((resolve) => setTimeout(resolve, backoffMs))
       return callAI(messages, jsonMode, retryCount + 1)
     }
 
