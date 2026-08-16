@@ -34,7 +34,7 @@ export async function callAI(messages: AIMessage[], jsonMode = false, retryCount
       model,
       messages,
       temperature: 0.1,
-      max_tokens: 4000
+      max_tokens: 8192
     }
 
     const response = await fetch(`${baseUrl}/chat/completions`, {
@@ -71,7 +71,8 @@ export async function callAI(messages: AIMessage[], jsonMode = false, retryCount
 }
 
 /**
- * Robust JSON extraction: Strips thought tags (<thought>...</thought>), markdown blocks, and isolates JSON body
+ * Robust JSON extraction: Strips thought tags (<thought>...</thought>), markdown blocks, isolates JSON body,
+ * and repairs unclosed/truncated JSON structures.
  */
 export function cleanJsonResponse(raw: string): string {
   let cleaned = raw.trim()
@@ -93,13 +94,88 @@ export function cleanJsonResponse(raw: string): string {
   const firstBracket = cleaned.indexOf('[')
   const lastBracket = cleaned.lastIndexOf(']')
 
-  if (firstBrace !== -1 && lastBrace !== -1 && (firstBracket === -1 || firstBrace < firstBracket)) {
-    cleaned = cleaned.substring(firstBrace, lastBrace + 1)
-  } else if (firstBracket !== -1 && lastBracket !== -1) {
-    cleaned = cleaned.substring(firstBracket, lastBracket + 1)
+  if (firstBrace !== -1 && (firstBracket === -1 || firstBrace < firstBracket)) {
+    if (lastBrace !== -1 && lastBrace > firstBrace) {
+      cleaned = cleaned.substring(firstBrace, lastBrace + 1)
+    } else {
+      cleaned = cleaned.substring(firstBrace)
+    }
+  } else if (firstBracket !== -1) {
+    if (lastBracket !== -1 && lastBracket > firstBracket) {
+      cleaned = cleaned.substring(firstBracket, lastBracket + 1)
+    } else {
+      cleaned = cleaned.substring(firstBracket)
+    }
   }
 
+  // Repair unclosed JSON if truncated
+  cleaned = repairJson(cleaned.trim())
+
   return cleaned.trim()
+}
+
+/**
+ * Repairs unclosed JSON brackets and strings if an LLM response was truncated
+ */
+function repairJson(jsonStr: string): string {
+  try {
+    JSON.parse(jsonStr)
+    return jsonStr
+  } catch {
+    // Continue with repair attempt
+  }
+
+  let inString = false
+  let escaped = false
+  const stack: string[] = []
+
+  for (let i = 0; i < jsonStr.length; i++) {
+    const char = jsonStr[i]
+
+    if (escaped) {
+      escaped = false
+      continue
+    }
+
+    if (char === '\\') {
+      escaped = true
+      continue
+    }
+
+    if (char === '"') {
+      inString = !inString
+      continue
+    }
+
+    if (!inString) {
+      if (char === '{' || char === '[') {
+        stack.push(char)
+      } else if (char === '}' && stack[stack.length - 1] === '{') {
+        stack.pop()
+      } else if (char === ']' && stack[stack.length - 1] === '[') {
+        stack.pop()
+      }
+    }
+  }
+
+  let repaired = jsonStr
+
+  // If ended in an open string, close it
+  if (inString) {
+    repaired += '"'
+  }
+
+  // Strip any trailing comma before closing
+  repaired = repaired.replace(/,\s*$/, '')
+
+  // Close remaining open brackets in reverse order
+  while (stack.length > 0) {
+    const openChar = stack.pop()
+    if (openChar === '{') repaired += '}'
+    else if (openChar === '[') repaired += ']'
+  }
+
+  return repaired
 }
 
 /**

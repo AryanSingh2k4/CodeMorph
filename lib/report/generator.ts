@@ -274,8 +274,8 @@ export function calculateSecurityScore(
 }
 
 export function generateUnifiedDiff(original: string, patched: string, filePath: string): string {
-  const originalLines = (original || '').replace(/\r\n/g, '\n').split('\n')
-  const patchedLines = (patched || '').replace(/\r\n/g, '\n').split('\n')
+  const originalLines = (original || '').split('\n')
+  const patchedLines = (patched || '').split('\n')
 
   let diff = `--- a/${filePath}\n+++ b/${filePath}\n@@ -1,${originalLines.length} +1,${patchedLines.length} @@\n`
 
@@ -1555,3 +1555,28 @@ function escapeHtml(str?: string | null): string {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;')
 }
+
+export function generateSecurityReport(
+  job: Job,
+  files: JobFile[],
+  findings: Finding[],
+  runs: SandboxRun[]
+): {
+  data: ReportData
+  markdown: string
+  html: string
+  securityScore: number
+  grade: string
+} {
+  const data = generateReportData(job, files, findings, runs)
+  const markdown = generateMarkdownReport(data)
+  const html = generateHtmlReport(data)
+  return {
+    data,
+    markdown,
+    html,
+    securityScore: data.metrics.remediatedScore,
+    grade: data.metrics.remediatedGrade
+  }
+}
+
