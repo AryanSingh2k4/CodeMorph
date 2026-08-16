@@ -21,8 +21,9 @@ export async function ingestRepo(
     'User-Agent': 'CodeMorph-Agent'
   }
 
-  if (accessToken) {
-    headers.Authorization = `Bearer ${accessToken}`
+  const token = accessToken || process.env.GITHUB_PAT
+  if (token) {
+    headers.Authorization = `token ${token}`
   }
 
   try {

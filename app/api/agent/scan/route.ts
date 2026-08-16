@@ -22,18 +22,16 @@ export async function POST(req: NextRequest) {
     const supabase = createClient()
     let files: JobFile[] = []
 
-    // Check mock DB or Supabase
-    if (mockDb.getJob(jobId)) {
-      files = mockDb.getFiles(jobId)
-    } else {
-      const { data, error } = await supabase
-        .from('job_files')
-        .select('*')
-        .eq('job_id', jobId)
+    // Check Supabase first, then fallback to mock store
+    const { data, error } = await supabase
+      .from('job_files')
+      .select('*')
+      .eq('job_id', jobId)
 
-      if (!error && data) {
-        files = data as JobFile[]
-      }
+    if (!error && data && data.length > 0) {
+      files = data as JobFile[]
+    } else if (mockDb.getJob(jobId)) {
+      files = mockDb.getFiles(jobId)
     }
 
     if (!files || files.length === 0) {
@@ -45,8 +43,8 @@ export async function POST(req: NextRequest) {
     const scanResult = await runScannerAgent(files)
 
     const findingsToInsert: Finding[] = [
-      ...scanResult.vulnerabilities.map((v, i) => ({
-        id: `vuln-${jobId}-${i}`,
+      ...scanResult.vulnerabilities.map((v) => ({
+        id: crypto.randomUUID(),
         job_id: jobId,
         file_path: v.file,
         line_number: v.line,
@@ -56,8 +54,8 @@ export async function POST(req: NextRequest) {
         description: v.description,
         created_at: new Date().toISOString()
       })),
-      ...scanResult.migrations.map((m, i) => ({
-        id: `mig-${jobId}-${i}`,
+      ...scanResult.migrations.map((m) => ({
+        id: crypto.randomUUID(),
         job_id: jobId,
         file_path: m.file,
         type: 'migration' as const,

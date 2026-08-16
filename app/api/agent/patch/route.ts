@@ -23,14 +23,15 @@ export async function POST(req: NextRequest) {
     let files: JobFile[] = []
     let findings: Finding[] = []
 
-    if (mockDb.getJob(jobId)) {
+    const { data: dbFiles } = await supabase.from('job_files').select('*').eq('job_id', jobId)
+    const { data: dbFindings } = await supabase.from('findings').select('*').eq('job_id', jobId)
+
+    if (dbFiles && dbFiles.length > 0) {
+      files = dbFiles as JobFile[]
+      findings = (dbFindings || []) as Finding[]
+    } else if (mockDb.getJob(jobId)) {
       files = mockDb.getFiles(jobId)
       findings = mockDb.getFindings(jobId)
-    } else {
-      const { data: dbFiles } = await supabase.from('job_files').select('*').eq('job_id', jobId)
-      const { data: dbFindings } = await supabase.from('findings').select('*').eq('job_id', jobId)
-      if (dbFiles) files = dbFiles as JobFile[]
-      if (dbFindings) findings = dbFindings as Finding[]
     }
 
     if (files.length === 0) {

@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
       // Ignore if session cannot be fetched
     }
 
-    const jobId = `job-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 7)}`
+    const jobId = crypto.randomUUID()
     const normalizedRepoUrl = `https://github.com/${owner}/${repo}`
 
     const newJob: Job = {
@@ -151,8 +151,8 @@ export class DashboardView extends Component {
           ]
         }
 
-        const jobFiles: JobFile[] = files.map((f, i) => ({
-          id: `file-${jobId}-${i}`,
+        const jobFiles: JobFile[] = files.map((f) => ({
+          id: crypto.randomUUID(),
           job_id: jobId,
           file_path: f.path,
           original_content: f.content,
